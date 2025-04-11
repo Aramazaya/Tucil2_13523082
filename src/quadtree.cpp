@@ -2,7 +2,12 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
+int QuadTree::n_node = 0;
+int QuadTree::max_depth = 0;
+
 void QuadTree::makeChild(){
+    n_node += 4;
+    max_depth = max(max_depth, depth + 1);
     vector<Block> blocks = info.divideBlock();
     UpLeft = new QuadTree(blocks[0], depth + 1);
     UpRight = new QuadTree(blocks[1], depth + 1);

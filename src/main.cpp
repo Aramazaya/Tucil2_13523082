@@ -12,7 +12,7 @@ unsigned char *init(int &width, int &height, int &channels, string &savePath, in
         return nullptr;
     }
     
-    std::cout << "Image data pointer: " << (void*)imageData << std::endl;
+    cout << "Image data pointer: " << (void*)imageData << endl;
     cout << "Image loaded successfully" << endl;
     cout << "Image width: " << width << endl;
     cout << "Image height: " << height << endl;
@@ -125,8 +125,9 @@ void saveImage(unsigned char *outputData, int width, int height, int channels, c
     }
 }
 
-void run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int width, int height, int channels, unsigned char *imageData, int maxDepth, double minBlockSize){
+chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int width, int height, int channels, unsigned char *imageData, int maxDepth, double minBlockSize){
     double threshold;
+    chrono::_V2::system_clock::time_point startTime;
     switch (method) {
         case 1:
             while (true) {
@@ -152,6 +153,7 @@ void run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int
             cout << "Max Depth: " << maxDepth << endl;
             cout << "Min Block Size: " << minBlockSize << endl;
             cout << "Image Data: " << (void*)imageData << endl;
+            startTime = chrono::high_resolution_clock::now();
             callVar(n_node, width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 2:
@@ -171,6 +173,7 @@ void run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int
                     cout << "Invalid threshold. Please enter a value between 0 and 127.5." << endl;
                 }
             }
+            startTime = chrono::high_resolution_clock::now();
             callMAD(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 3:
@@ -190,6 +193,7 @@ void run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int
                     cout << "Invalid threshold. Please enter a value between 0 and 255." << endl;
                 }
             }
+            startTime = chrono::high_resolution_clock::now();
             callMPD(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 4:
@@ -209,13 +213,16 @@ void run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int
                     cout << "Invalid threshold. Please enter a value between 0 and 8." << endl;
                 }
             }
+            startTime = chrono::high_resolution_clock::now();
             callEntrophy(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         default:
+            startTime = chrono::high_resolution_clock::now();
             cout << "Invalid method selected" << endl;
             break;
     }
     stbi_image_free(imageData);
+    return startTime;
 }
 
 int main(){
@@ -232,9 +239,30 @@ int main(){
     QuadTree* root = new QuadTree(Block(0, 0, width, height, width), 0);
     while (true) {
         int n_node = 0;
-        run(n_node, outputData, root, method, width, height, channels, imageData, maxDepth, minBlockSize);
+        auto startTime = run(n_node, outputData, root, method, width, height, channels, imageData, maxDepth, minBlockSize);
+        auto endTimeNoSave = chrono::high_resolution_clock::now();
         saveImage(outputData, width, height, channels, savePath);
-        cout << "Number of nodes: " << n_node << endl;
+        auto endTimeWSave = chrono::high_resolution_clock::now();
+        auto durationNoSave = chrono::duration_cast<chrono::milliseconds>(endTimeNoSave - startTime);
+        auto durationWSave = chrono::duration_cast<chrono::milliseconds>(endTimeWSave - startTime);
+        cout << "Number of nodes: " << root->n_node << endl;
+        cout << "Max depth: " << root->max_depth << endl;
+        cout << "Execution time without saving: " << durationNoSave.count() << " ms" << endl;
+        cout << "Execution time with saving: " << durationWSave.count() << " ms" << endl;
+        uintmax_t fileSizeInit;
+        uintmax_t fileSizeEnd;
+        ifstream file(imagePath, ios::binary | ios::ate);
+        if (!file.is_open()) fileSizeInit = 0;
+        else fileSizeInit = file.tellg()/1000;
+        file.close();
+        ifstream file2(savePath, ios::binary | ios::ate);
+        if (!file2.is_open()) fileSizeEnd = 0;
+        else fileSizeEnd = file2.tellg()/1000;
+        file2.close();
+        double compressionRatio = 100.0 * (1.0 - static_cast<double>(fileSizeEnd) / fileSizeInit);
+        cout << "Original file size: " << fileSizeInit << " KB" << endl;
+        cout << "Compressed file size: " << fileSizeEnd << " KB" << endl;
+        cout << "Compression ratio: " << compressionRatio << "%" << endl;
         cout << "Do you want to run the program again? (y/n): ";
         char choice;
         cin >> choice;

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <limits>
 #include <cctype>
+#include <chrono>
+#include <fstream>
 #include "quadtree.hpp"
 
 #endif

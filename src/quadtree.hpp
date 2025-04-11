@@ -13,6 +13,8 @@ private:
     QuadTree* DownLeft;
     QuadTree* DownRight;
 public:
+    static int n_node;
+    static int max_depth;
     //Constructor and Destructor
     QuadTree(Block info, int depth) : info(info), depth(depth), UpLeft(nullptr), UpRight(nullptr), DownLeft(nullptr), DownRight(nullptr) {}
     QuadTree() : info(Block()), depth(0), UpLeft(nullptr), UpRight(nullptr), DownLeft(nullptr), DownRight(nullptr) {}
