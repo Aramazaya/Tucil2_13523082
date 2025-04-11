@@ -28,14 +28,15 @@ Program untuk melakukan kompresi dengan menggunakan Quadtree dan implementasi Di
    make
    ```
 5. Run the program
+
+   Unix-Like:
    ```bash
    ./bin/main
    ```
-   for Unix-Like system
+   Windows:
    ```bash
    bin\main
    ```
-   for Windows
 # Manual Compilation
 1. open a terminal in your desired directory
    ```bash
@@ -51,19 +52,23 @@ Program untuk melakukan kompresi dengan menggunakan Quadtree dan implementasi Di
    cd Tucil2_13523082
    ```
 4. Compile the program
-   Unix-Like
+
+   Unix-Like:
    ```bash
    g++ -std=c++17 -Wall -O2 -o bin/main src/Image.cpp src/main.cpp src/quadtree.cpp
    ```
-   Windows
+
+   Windows:
    ```bash
    g++ -std=c++17 -Wall -O2 -o bin/main.exe src/Image.cpp src/main.cpp src/quadtree.cpp
    ```
 6. Run the program
+
    Unix-Like system :
    ```bash
    ./bin/main
    ```
+
    Windows:
    ```bash
    bin\main.exe
