@@ -1,5 +1,6 @@
 #include "quadtree.hpp"
-
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 void QuadTree::makeChild(){
     vector<Block> blocks = info.divideBlock();
@@ -8,23 +9,38 @@ void QuadTree::makeChild(){
     DownLeft = new QuadTree(blocks[2], depth + 1);
     DownRight = new QuadTree(blocks[3], depth + 1);
 }
-double QuadTree::getRGBVariance(const unsigned char *imageData, int channels) const{
-    RGB avg = info.getRGBAvg(imageData, channels);
-    vector<double> Var;
-    double redSum = 0.0;
-    double greenSum = 0.0;
-    double blueSum = 0.0;
-    double variance = 0.0;
+double QuadTree::getRGBVariance(const unsigned char *imageData, int channels) const {
+    auto avg = info.getRGBAvg(imageData, channels);
+    double redSum = 0.0, greenSum = 0.0, blueSum = 0.0;
     for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
         for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
-            int index = (i * info.getWidth() + j) * channels;
-            redSum += pow(imageData[index] - avg.r, 2);
-            greenSum += pow(imageData[index + 1] - avg.g, 2);
-            blueSum += pow(imageData[index + 2] - avg.b, 2);
+            int index = (i * info.getImgWidth() + j) * channels;
+            redSum += imageData[index];
+            greenSum += imageData[index + 1];
+            blueSum += imageData[index + 2];
         }
     }
-    variance = ((redSum/avg.pixelCount) + (greenSum/avg.pixelCount) + (blueSum/avg.pixelCount))/3;
-    return variance;
+    redSum /= avg.pixelCount;
+    greenSum /= avg.pixelCount;
+    blueSum /= avg.pixelCount;
+    for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
+        for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
+            int index = (i * info.getImgWidth() + j) * channels;
+            double rDiff = imageData[index] - avg.r;
+            double gDiff = imageData[index + 1] - avg.g;
+            double bDiff = imageData[index + 2] - avg.b;
+            
+            redSum += rDiff * rDiff;
+            greenSum += gDiff * gDiff;
+            blueSum += bDiff * bDiff;
+        }
+    }
+    
+    double varianceR = redSum / avg.pixelCount;
+    double varianceG = greenSum / avg.pixelCount;
+    double varianceB = blueSum / avg.pixelCount;
+    
+    return (varianceR + varianceG + varianceB) / 3.0;
 }
 double QuadTree::getMAD(const unsigned char *imageData, int channels) const {
     RGB avg = info.getRGBAvg(imageData, channels);
@@ -34,7 +50,7 @@ double QuadTree::getMAD(const unsigned char *imageData, int channels) const {
     double mad = 0.0;
     for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
         for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
-            int index = (i * info.getWidth() + j) * channels;
+            int index = (i * info.getImgWidth() + j) * channels;
             redSum += abs(imageData[index] - avg.r);
             greenSum += abs(imageData[index + 1] - avg.g);
             blueSum += abs(imageData[index + 2] - avg.b);
@@ -53,7 +69,7 @@ double QuadTree::getMPD(const unsigned char *imageData, int channels) const{
     double mpd = 0.0;
     for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
         for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
-            int index = (i * info.getWidth() + j) * channels;
+            int index = (i * info.getImgWidth() + j) * channels;
             if (imageData[index] > redMax) {
                 redMax = imageData[index];
             }
@@ -91,7 +107,7 @@ double QuadTree::getEntrophy(const unsigned char *imageData, int channels) const
     }
     for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
         for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
-            int index = (i * info.getWidth() + j) * channels;
+            int index = (i * info.getImgWidth() + j) * channels;
             RMap[imageData[index]]++;
             GMap[imageData[index + 1]]++;
             BMap[imageData[index + 2]]++;
@@ -113,4 +129,15 @@ double QuadTree::getEntrophy(const unsigned char *imageData, int channels) const
     }
     entrophy = (entrophyR + entrophyG + entrophyB) / 3;
     return entrophy;
+}
+
+int QuadTree::getMaxDepth(QuadTree* node) const {
+    if (!node) return 0;
+
+    int maxChildDepth = 0;
+    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getUpLeft()));
+    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getUpRight()));
+    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getDownLeft()));
+    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getDownRight()));
+    return maxChildDepth + 1;
 }

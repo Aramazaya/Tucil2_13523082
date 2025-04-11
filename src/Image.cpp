@@ -1,28 +1,31 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBI_NO_EXIF
+#include "stb_image.h"
+#include "stb_image_write.h"
 #include "Image.hpp"
 
 vector<Block> Block::divideBlock() {
-    // Divide the block into four smaller blocks
     int halfWidth = width / 2;
     int halfHeight = height / 2;
+    int rightWidth = width - halfWidth;
+    int bottomHeight = height - halfHeight;
 
     Block UpLeft(x, y, halfWidth, halfHeight, imgwidth);
-    Block UpRight(x + halfWidth, y, halfWidth, halfHeight, imgwidth);
-    Block DownLeft(x, y + halfHeight, halfWidth, halfHeight, imgwidth);
-    Block DownRight(x + halfWidth, y + halfHeight, halfWidth, halfHeight, imgwidth);
+    Block UpRight(x + halfWidth, y, rightWidth, halfHeight, imgwidth);
+    Block DownLeft(x, y + halfHeight, halfWidth, bottomHeight, imgwidth);
+    Block DownRight(x + halfWidth, y + halfHeight, rightWidth, bottomHeight, imgwidth);
 
     return { UpLeft, UpRight, DownLeft, DownRight };
 }
 
 RGB Block::getRGBAvg(const unsigned char *imageData, int channels) const {
-    long long sumR = 0;
-    long long sumG = 0;
-    long long sumB = 0;
+    double sumR = 0.0;
+    double sumG = 0.0;
+    double sumB = 0.0;
     int pixelCount = 0;
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            cout<<"i: " << i << " j: " << j << endl;
             int index = (i * imgwidth + j) * channels;
             sumR += imageData[index];
             sumG += imageData[index + 1];
@@ -30,7 +33,7 @@ RGB Block::getRGBAvg(const unsigned char *imageData, int channels) const {
             pixelCount++;
         }
     }
-    return RGB(static_cast<unsigned char>(sumR / pixelCount),static_cast<unsigned char>(sumG / pixelCount),static_cast<unsigned char>(sumB / pixelCount), pixelCount);
+    return RGB(sumR / pixelCount ,sumG / pixelCount, sumB / pixelCount, pixelCount);
 }
 
 

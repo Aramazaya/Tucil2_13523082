@@ -1,8 +1,6 @@
 #ifndef IMAGE_HPP
 #define IMAGE_HPP
 
-#include "stb_image.h"
-#include "stb_image_write.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -12,11 +10,11 @@ using namespace std;
 
 struct RGB
 {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+    double r;
+    double g;
+    double b;
     int pixelCount;
-    RGB(unsigned char r, unsigned char g, unsigned char b, int pxc) : r(r), g(g), b(b), pixelCount(pxc) {}
+    RGB(double r, double g, double b, int pxc) : r(r), g(g), b(b), pixelCount(pxc) {}
     RGB() : r(0), g(0), b(0), pixelCount(0) {}
 };
 

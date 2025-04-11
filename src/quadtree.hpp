@@ -37,5 +37,6 @@ public:
     double getMAD(const unsigned char *imageData, int channels) const;
     double getMPD(const unsigned char *imageData, int channels) const;
     double getEntrophy(const unsigned char *imageData, int channels) const;
+    int getMaxDepth(QuadTree* node) const;
 };
 #endif
