@@ -20,17 +20,6 @@ double QuadTree::getRGBVariance(const unsigned char *imageData, int channels) co
     for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
         for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
             int index = (i * info.getImgWidth() + j) * channels;
-            redSum += imageData[index];
-            greenSum += imageData[index + 1];
-            blueSum += imageData[index + 2];
-        }
-    }
-    redSum /= avg.pixelCount;
-    greenSum /= avg.pixelCount;
-    blueSum /= avg.pixelCount;
-    for (int i = info.getY(); i < info.getY() + info.getHeight(); ++i) {
-        for (int j = info.getX(); j < info.getX() + info.getWidth(); ++j) {
-            int index = (i * info.getImgWidth() + j) * channels;
             double rDiff = imageData[index] - avg.r;
             double gDiff = imageData[index + 1] - avg.g;
             double bDiff = imageData[index + 2] - avg.b;
@@ -134,15 +123,4 @@ double QuadTree::getEntrophy(const unsigned char *imageData, int channels) const
     }
     entrophy = (entrophyR + entrophyG + entrophyB) / 3;
     return entrophy;
-}
-
-int QuadTree::getMaxDepth(QuadTree* node) const {
-    if (!node) return 0;
-
-    int maxChildDepth = 0;
-    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getUpLeft()));
-    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getUpRight()));
-    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getDownLeft()));
-    maxChildDepth = max(maxChildDepth, getMaxDepth(node->getDownRight()));
-    return maxChildDepth + 1;
 }

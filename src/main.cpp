@@ -11,8 +11,6 @@ unsigned char *init(int &width, int &height, int &channels, string &savePath, in
         cout << "Error loading image" << endl;
         return nullptr;
     }
-    
-    cout << "Image data pointer: " << (void*)imageData << endl;
     cout << "Image loaded successfully" << endl;
     cout << "Image width: " << width << endl;
     cout << "Image height: " << height << endl;
@@ -125,7 +123,9 @@ void saveImage(unsigned char *outputData, int width, int height, int channels, c
     }
 }
 
-chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData, QuadTree* root, int method, int width, int height, int channels, unsigned char *imageData, int maxDepth, double minBlockSize){
+chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData, QuadTree* root, 
+                                          int method, int width, int height, int channels, 
+                                          unsigned char *imageData, int maxDepth, double minBlockSize){
     double threshold;
     chrono::_V2::system_clock::time_point startTime;
     switch (method) {
@@ -146,13 +146,6 @@ chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData
                     cout << "Invalid threshold. Please enter a value above 0." << endl;
                 }
             }
-            cout << "Threshold: " << threshold << endl;
-            cout << "Width: " << width << endl;
-            cout << "Height: " << height << endl;
-            cout << "Channels: " << channels << endl;
-            cout << "Max Depth: " << maxDepth << endl;
-            cout << "Min Block Size: " << minBlockSize << endl;
-            cout << "Image Data: " << (void*)imageData << endl;
             startTime = chrono::high_resolution_clock::now();
             callVar(n_node, width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
@@ -263,20 +256,6 @@ int main(){
         cout << "Original file size: " << fileSizeInit << " KB" << endl;
         cout << "Compressed file size: " << fileSizeEnd << " KB" << endl;
         cout << "Compression ratio: " << compressionRatio << "%" << endl;
-        cout << "Do you want to run the program again? (y/n): ";
-        char choice;
-        cin >> choice;
-        if (choice == 'y' || choice == 'Y') {
-            delete[] outputData;
-            imageData = init(width, height, channels, savePath, maxDepth, minBlockSize, method, imagePath);
-            if (imageData = nullptr) {
-                cout << "Closing.." << endl;
-                return 0;
-            }
-            outputData = new unsigned char[width * height * channels];
-            root = new QuadTree(Block(0, 0, width, height, width), 0);
-        } else {
-            break;
-        }
+        break;
     }
 }
