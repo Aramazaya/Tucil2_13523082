@@ -4,7 +4,7 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 #include "Image.hpp"
-
+//Divide blocks into 4 equal halfs. Returns array of Block
 vector<Block> Block::divideBlock() {
     int halfWidth = width / 2;
     int halfHeight = height / 2;
@@ -18,7 +18,7 @@ vector<Block> Block::divideBlock() {
 
     return { UpLeft, UpRight, DownLeft, DownRight };
 }
-
+//Get the average RGB value and the pixel count for the block
 RGB Block::getRGBAvg(const unsigned char *imageData, int channels) const {
     double sumR = 0.0;
     double sumG = 0.0;

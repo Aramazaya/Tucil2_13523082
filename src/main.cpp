@@ -24,7 +24,7 @@ unsigned char *init(int &width, int &height, int &channels, string &savePath, in
     cin >> method;
     return imageData;
 }
-
+//Process leaf with the corresponding position in outputData
 void processLeafNodes(QuadTree* root, unsigned char *outputData, unsigned char *imageData, int channels, int width) {
     RGB avg = root->getInfo().getRGBAvg(imageData, channels);
     for (int i = root->getInfo().getY(); i < root->getInfo().getY() + root->getInfo().getHeight(); ++i) {
@@ -39,7 +39,7 @@ void processLeafNodes(QuadTree* root, unsigned char *outputData, unsigned char *
         }
     }
 }
-
+//Recursive function for variance method
 void callVar(int &n_node, int width, unsigned char *outputData, unsigned char *imageData, int channels, double threshold, QuadTree* root, int maxDepth, int minBlockSize) {
     double variance = root->getRGBVariance(imageData, channels);
     if (variance < threshold){processLeafNodes(root, outputData, imageData, channels, width);}
@@ -53,7 +53,7 @@ void callVar(int &n_node, int width, unsigned char *outputData, unsigned char *i
         callVar(n_node, width, outputData, imageData, channels, threshold, root->getDownRight(), maxDepth, minBlockSize);
     }
 }
-
+//Recursive funtion for Mean Absolute Deviation method
 void callMAD(int width, unsigned char *outputData, unsigned char *imageData, int channels, double threshold, QuadTree* root, int maxDepth, int minBlockSize) {
     double MAD = root->getMAD(imageData, channels);
     if (MAD < threshold){processLeafNodes(root, outputData, imageData, channels, width);}
@@ -68,7 +68,7 @@ void callMAD(int width, unsigned char *outputData, unsigned char *imageData, int
     }
     
 }
-
+//Recursive Function for Maximum Pixel Difference method
 void callMPD(int width, unsigned char *outputData, unsigned char *imageData, int channels, double threshold, QuadTree* root, int maxDepth, int minBlockSize) {
     double MPD = root->getMPD(imageData, channels);
     if (MPD < threshold){processLeafNodes(root, outputData, imageData, channels, width);}
@@ -83,7 +83,7 @@ void callMPD(int width, unsigned char *outputData, unsigned char *imageData, int
     }
     
 }
-
+//Recursive Function for Entropy method
 void callEntrophy(int width, unsigned char *outputData, unsigned char *imageData, int channels, double threshold, QuadTree* root, int maxDepth, int minBlockSize) {
     double MRD = root->getEntrophy(imageData, channels);
     if (MRD < threshold){processLeafNodes(root, outputData, imageData, channels, width);}
@@ -122,12 +122,13 @@ void saveImage(unsigned char *outputData, int width, int height, int channels, c
         cout << "Error saving image to " << savePath << endl;
     }
 }
-
+//Main Run function
 chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData, QuadTree* root, 
                                           int method, int width, int height, int channels, 
                                           unsigned char *imageData, int maxDepth, double minBlockSize){
     double threshold;
     chrono::_V2::system_clock::time_point startTime;
+    //Switch based on which method chosen
     switch (method) {
         case 1:
             while (true) {
@@ -147,6 +148,7 @@ chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData
                 }
             }
             startTime = chrono::high_resolution_clock::now();
+            //Calling recursive procedure
             callVar(n_node, width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 2:
@@ -167,6 +169,7 @@ chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData
                 }
             }
             startTime = chrono::high_resolution_clock::now();
+            //Calling recursive procedure
             callMAD(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 3:
@@ -187,6 +190,7 @@ chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData
                 }
             }
             startTime = chrono::high_resolution_clock::now();
+            //Calling recursive procedure
             callMPD(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         case 4:
@@ -207,6 +211,7 @@ chrono::_V2::system_clock::time_point run(int &n_node, unsigned char *outputData
                 }
             }
             startTime = chrono::high_resolution_clock::now();
+            //Calling recursive procedure
             callEntrophy(width, outputData, imageData, channels, threshold, root, maxDepth, minBlockSize);
             break;
         default:
@@ -223,21 +228,26 @@ int main(){
     int width, height, channels, maxDepth,  method;
     double minBlockSize;
     string savePath, imagePath;
+    //Initialize image data
     unsigned char *imageData = init(width, height, channels, savePath, maxDepth, minBlockSize, method, imagePath);
     if (imageData == nullptr) {
         cout << "Closing.." << endl;
         return 0;
     }
+    //Initialize output data and quadtree
     unsigned char *outputData = new unsigned char[width * height * channels];
     QuadTree* root = new QuadTree(Block(0, 0, width, height, width), 0);
     while (true) {
+        //Run the quadtree compression algorithm
         int n_node = 0;
         auto startTime = run(n_node, outputData, root, method, width, height, channels, imageData, maxDepth, minBlockSize);
+        //Get End Time
         auto endTimeNoSave = chrono::high_resolution_clock::now();
         saveImage(outputData, width, height, channels, savePath);
         auto endTimeWSave = chrono::high_resolution_clock::now();
         auto durationNoSave = chrono::duration_cast<chrono::milliseconds>(endTimeNoSave - startTime);
         auto durationWSave = chrono::duration_cast<chrono::milliseconds>(endTimeWSave - startTime);
+        //Output results
         cout << "Number of nodes: " << root->n_node << endl;
         cout << "Max depth: " << root->max_depth << endl;
         cout << "Execution time without saving: " << durationNoSave.count() << " ms" << endl;

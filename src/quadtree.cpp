@@ -1,7 +1,7 @@
 #include "quadtree.hpp"
 #include "stb_image.h"
 #include "stb_image_write.h"
-
+//Static variable init
 int QuadTree::n_node = 0;
 int QuadTree::max_depth = 0;
 
@@ -14,6 +14,7 @@ void QuadTree::makeChild(){
     DownLeft = new QuadTree(blocks[2], depth + 1);
     DownRight = new QuadTree(blocks[3], depth + 1);
 }
+//Calculation for RGB variance
 double QuadTree::getRGBVariance(const unsigned char *imageData, int channels) const {
     auto avg = info.getRGBAvg(imageData, channels);
     double redSum = 0.0, greenSum = 0.0, blueSum = 0.0;
@@ -36,6 +37,7 @@ double QuadTree::getRGBVariance(const unsigned char *imageData, int channels) co
     
     return (varianceR + varianceG + varianceB) / 3.0;
 }
+//Calculatio for RGM Mean Absolute Deviation
 double QuadTree::getMAD(const unsigned char *imageData, int channels) const {
     RGB avg = info.getRGBAvg(imageData, channels);
     double redSum = 0.0;
@@ -53,6 +55,7 @@ double QuadTree::getMAD(const unsigned char *imageData, int channels) const {
     mad = ((redSum/avg.pixelCount) + (greenSum/avg.pixelCount) + (blueSum/avg.pixelCount))/3;
     return mad;
 }
+//Calculation for Maximum Pixel Difference
 double QuadTree::getMPD(const unsigned char *imageData, int channels) const{
     double redMax = 0.0;
     double redMin = 255.0;
@@ -87,6 +90,7 @@ double QuadTree::getMPD(const unsigned char *imageData, int channels) const{
     mpd = ((redMax - redMin) + (greenMax - greenMin) + (blueMax - blueMin)) / 3;
     return mpd;
 }
+//Calculation for entropy
 double QuadTree::getEntrophy(const unsigned char *imageData, int channels) const {
     map<int, int> RMap, GMap, BMap;
     int pixelCount = info.getWidth() * info.getHeight();
